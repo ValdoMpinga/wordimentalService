@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from sentiment_analyser.helpers import gutendexRequestsHelper
-
+from sentiment_analyser.sentiment_analysers.NLTK import analyser
 class BookSentimentAnalyserAPIView(APIView):
     def post(self, request):
         # Get the id parameter from the request data
@@ -21,7 +21,7 @@ class BookSentimentAnalyserAPIView(APIView):
             authors = ', '.join([author['name'] for author in metadata.get('authors', [])])
 
             # Return book information and content in the response
-            return Response({"title": title, "authors": authors, "content": book_content})
+            return Response({"title": title, "authors": authors, "content":  analyser.analyze_sentiment(book_content)})
         except Exception as e:
             # Return error response if book data retrieval fails
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
