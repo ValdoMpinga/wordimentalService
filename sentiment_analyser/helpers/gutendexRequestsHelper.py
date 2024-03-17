@@ -1,20 +1,22 @@
 import urllib.request
 import json
 
-
-def getRequest(url):
+def getRequest(book_id):
     try:
-        # Make the request using urllib
-        with urllib.request.urlopen(url) as response:
-            # Read the response content
-            response_content = response.read()
-            # Decode JSON response
-            data = json.loads(response_content)
-            return data
+        # Fetch metadata
+        metadata_url = f"https://gutendex.com/books/{book_id}.json"
+        with urllib.request.urlopen(metadata_url) as metadata_response:
+            metadata = json.loads(metadata_response.read())
+        
+        # Fetch content
+        content_url = f"https://www.gutenberg.org/ebooks/{book_id}.txt.utf-8"
+        with urllib.request.urlopen(content_url) as content_response:
+            book_content = content_response.read().decode('utf-8')
+
+        return metadata, book_content
     except urllib.error.HTTPError as e:
         # Handle HTTP errors (e.g., 404 Not Found)
-        raise Exception(f"Failed to retrieve data from {url}: {e}")
+        raise Exception(f"Failed to retrieve data for book ID {book_id}: {e}")
     except Exception as e:
         # Handle other errors
-        raise Exception(f"Failed to retrieve data from {url}: {e}")
-
+        raise Exception(f"Failed to retrieve data for book ID {book_id}: {e}")
