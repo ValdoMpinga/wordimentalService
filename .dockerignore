@@ -1,0 +1,17 @@
+# Ignore Docker specific files
+.dockerignore
+Dockerfile
+
+# Ignore development related files and directories
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+*.log
+
+# Ignore Django related files and directories
+*.sqlite3
+*.pyc
+*.pyo
+*.pyd
+__pycache__
