@@ -13,6 +13,7 @@ def getRequest(book_id):
         with urllib.request.urlopen(content_url) as content_response:
             book_content = content_response.read().decode('utf-8')
 
+        #print(metadata)
         return metadata, book_content
     except urllib.error.HTTPError as e:
         # Handle HTTP errors (e.g., 404 Not Found)

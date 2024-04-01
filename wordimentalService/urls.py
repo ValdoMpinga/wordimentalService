@@ -3,5 +3,6 @@ from . import views
 
 urlpatterns = [
     path('sentiment-analyser/analyse-book/', views.BookSentimentAnalyserAPIView.as_view(), name='analyse-book'),
-    path('sentiment-analyser/compare-books/', views.CompareBooksAPIView.as_view(), name='compare-books'),
+    path('sentiment-analyser/compare-books/', views.CompareBooksAPIView.as_view(), name='compare-books'),    
+    path('sentiment-analyser/actor-sentiment-analyser/', views.CharacterSentimentAnalyserAPIView.as_view(), name='analyse-actor'),
 ]
