@@ -33,8 +33,8 @@ class BookSentimentAnalyserAPIView(APIView):
             return Response({
                 "title": title, 
                 "authors": authors, 
-                "NLKT_analysis":  nltk_analyser.analyze_sentiment(book_content),
-                "TextBlob_analysis": textblob_analyser.analyze_sentiment(book_content),
+                "NLKT_analysis":  nltk_analyser.nltk_analyze_sentiment(book_content),
+                "TextBlob_analysis": textblob_analyser.textblob_analyze_sentiment(book_content),
                 })
         except Exception as e:
             # Return error response if book data retrieval fails
@@ -64,13 +64,13 @@ class CompareBooksAPIView(APIView):
             authors2 = ', '.join([author['name'] for author in metadata2.get('authors', [])])
 
             # Perform sentiment analysis for both books
-            nltk_analysis1 = nltk_analyser.analyze_sentiment(book1_content)
-            textblob_analysis1 = textblob_analyser.analyze_sentiment(book1_content)
-            transformers_analysis1 = transformers_analyser.analyze_sentiment(book1_content)
+            nltk_analysis1 = nltk_analyser.nltk_analyze_sentiment(book1_content)
+            textblob_analysis1 = textblob_analyser.textblob_analyze_sentiment(book1_content)
+            transformers_analysis1 = transformers_analyser.transformers_analyze_sentiment(book1_content)
 
-            nltk_analysis2 = nltk_analyser.analyze_sentiment(book2_content)
-            textblob_analysis2 = textblob_analyser.analyze_sentiment(book2_content)
-            transformers_analysis2 = transformers_analyser.analyze_sentiment(book2_content)
+            nltk_analysis2 = nltk_analyser.nltk_analyze_sentiment(book2_content)
+            textblob_analysis2 = textblob_analyser.textblob_analyze_sentiment(book2_content)
+            transformers_analysis2 = transformers_analyser.transformers_analyze_sentiment(book2_content)
 
             # Return the sentiment analysis results for both books in the response
             return Response({
@@ -146,16 +146,16 @@ def analyze_character_sentiment(book_content, character_name):
     # using NLTK, TextBlob, and Transformers libraries
     
     # NLTK
-    nltk_sentiment = nltk_analyser.analyze_character_sentiment(book_content, character_name)
+    nltk_sentiment = nltk_analyser.nltk_analyze_character_sentiment(book_content, character_name)
     print("NLTK Sentiment Analysis ", nltk_sentiment)
     
     # TextBlob
-    textblob_sentiment = textblob_analyser.analyze_character_sentiment(book_content, character_name)
-    print("TextBlob Sentiment Analysis ", nltk_sentiment)
+    textblob_sentiment = textblob_analyser.textblob_analyze_character_sentiment(book_content, character_name)
+    print("TextBlob Sentiment Analysis ", textblob_sentiment)
 
     # Transformers
-    transformers_sentiment = transformers_analyser.analyze_character_sentiment(book_content, character_name)
-    print("Transformers Sentiment Analysis ", nltk_sentiment)
+    transformers_sentiment = transformers_analyser.transformers_analyze_character_sentiment(book_content, character_name)
+    print("Transformers Sentiment Analysis ", transformers_sentiment)
 
 
     return {
