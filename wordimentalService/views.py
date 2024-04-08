@@ -5,6 +5,30 @@ from sentiment_analyser.helpers import gutendexRequestsHelper
 from sentiment_analyser.sentiment_analysers.NLTK import nltk_analyser
 from sentiment_analyser.sentiment_analysers.TextBlob import textblob_analyser
 
+class ListBooksAPIView(APIView):
+    def get(self, request):
+        # Define the number of books per request
+        num_books_per_request = 25
+
+        try:
+            # Fetch the books from Gutendex
+            books = gutendexRequestsHelper.get_books(num_books_per_request)
+
+            # Extract relevant information from the books
+            books_info = []
+            for book in books:
+                book_info = {
+                    "id": book['id'],
+                    "title": book['title'],
+                    "authors": ', '.join([author['name'] for author in book['authors']])
+                }
+                books_info.append(book_info)
+
+            return Response(books_info)
+        except Exception as e:
+            # Return error response if book retrieval fails
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 class BookSentimentAnalyserAPIView(APIView):
     def post(self, request):
 
@@ -27,7 +51,7 @@ class BookSentimentAnalyserAPIView(APIView):
             return Response({
                 "title": title, 
                 "authors": authors, 
-                "NLKT_analysis":  nltk_analyser.nltk_analyze_sentiment(book_content),
+                "NLTK_analysis":  nltk_analyser.nltk_analyze_sentiment(book_content),
                 "TextBlob_analysis": textblob_analyser.textblob_analyze_sentiment(book_content),
                 })
         except Exception as e:
@@ -68,13 +92,13 @@ class CompareBooksAPIView(APIView):
                 "book1": {
                     "title": title1,
                     "authors": authors1,
-                    "NLKT_analysis": nltk_analysis1,
+                    "NLTK_analysis": nltk_analysis1,
                     "TextBlob_analysis": textblob_analysis1,
                 },
                 "book2": {
                     "title": title2,
                     "authors": authors2,
-                    "NLKT_analysis": nltk_analysis2,
+                    "NLTK_analysis": nltk_analysis2,
                     "TextBlob_analysis": textblob_analysis2,
                 }
             })
@@ -113,6 +137,7 @@ class CharacterSentimentAnalyserAPIView(APIView):
         except Exception as e:
             # Return error response if book data retrieval fails
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 def analyze_character_sentiment(book_content, character_name):
     # Perform sentiment analysis focusing on the character in the book content
