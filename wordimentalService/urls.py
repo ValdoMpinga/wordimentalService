@@ -6,5 +6,6 @@ urlpatterns = [
     path('sentiment-analyser/compare-books/', views.CompareBooksAPIView.as_view(), name='compare-books'),    
     path('sentiment-analyser/actor-sentiment-analyser/', views.CharacterSentimentAnalyserAPIView.as_view(), name='analyse-actor'),
     path('sentiment-analyser/list-books/', views.ListBooksAPIView.as_view(), name='list-books'),  # New endpoint
+    path('sentiment-analyser/get-book-id/', views.GetBookIDAPIView.as_view(), name='get-book-id'),  # New endpoint
 
 ]

@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import NotFound
 from sentiment_analyser.helpers import gutendexRequestsHelper
 from sentiment_analyser.sentiment_analysers.NLTK import nltk_analyser
 from sentiment_analyser.sentiment_analysers.TextBlob import textblob_analyser
@@ -28,7 +29,27 @@ class ListBooksAPIView(APIView):
         except Exception as e:
             # Return error response if book retrieval fails
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+ 
+class GetBookIDAPIView(APIView):
+    def post(self, request):
+        book_name = request.data.get('name')
+
+        if not book_name:
+            return Response({"error": "Parameter 'name' is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            books_data = gutendexRequestsHelper.search_books_by_name(book_name)
+
+            if not books_data:
+                raise NotFound(f"No book found with name '{book_name}'")
+
+            book_id = books_data[0]['id']
+            return Response({"id": book_id})
+        except NotFound as e:
+            return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+       
 class BookSentimentAnalyserAPIView(APIView):
     def post(self, request):
 
@@ -47,7 +68,6 @@ class BookSentimentAnalyserAPIView(APIView):
             
             print("authors: ", metadata.get('authors'))
             print("title: ", title)
-            # print(book_content)
             return Response({
                 "title": title, 
                 "authors": authors, 
@@ -55,39 +75,32 @@ class BookSentimentAnalyserAPIView(APIView):
                 "TextBlob_analysis": textblob_analyser.textblob_analyze_sentiment(book_content),
                 })
         except Exception as e:
-            # Return error response if book data retrieval fails
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CompareBooksAPIView(APIView):
     def post(self, request):
-        # Get the id parameters from the request data
         book1_id = request.data.get('id1')
         book2_id = request.data.get('id2')
 
-        # Check if both id parameters are provided
         if book1_id is None or book2_id is None:
             return Response({"error": "Parameters 'id1' and 'id2' are required"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # Retrieve book data for both books (metadata and content)
             metadata1, book1_content = gutendexRequestsHelper.getRequest(book1_id)
             metadata2, book2_content = gutendexRequestsHelper.getRequest(book2_id)
 
-            # Extract title and authors from metadata
             title1 = metadata1.get('title', 'Unknown')
             authors1 = ', '.join([author['name'] for author in metadata1.get('authors', [])])
 
             title2 = metadata2.get('title', 'Unknown')
             authors2 = ', '.join([author['name'] for author in metadata2.get('authors', [])])
 
-            # Perform sentiment analysis for both books
             nltk_analysis1 = nltk_analyser.nltk_analyze_sentiment(book1_content)
             textblob_analysis1 = textblob_analyser.textblob_analyze_sentiment(book1_content)
 
             nltk_analysis2 = nltk_analyser.nltk_analyze_sentiment(book2_content)
             textblob_analysis2 = textblob_analyser.textblob_analyze_sentiment(book2_content)
 
-            # Return the sentiment analysis results for both books in the response
             return Response({
                 "book1": {
                     "title": title1,
@@ -103,31 +116,24 @@ class CompareBooksAPIView(APIView):
                 }
             })
         except Exception as e:
-            # Return error response if book data retrieval fails
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CharacterSentimentAnalyserAPIView(APIView):
     def post(self, request):
-        # Get the id parameter and character name from the request data
         book_id = request.data.get('id')
         character_name = request.data.get('character')
 
-        # Check if both parameters are provided
         if book_id is None or character_name is None:
             return Response({"error": "Parameters 'id' and 'character' are required"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # Retrieve book data (metadata and content)
             metadata, book_content = gutendexRequestsHelper.getRequest(book_id)
 
-            # Analyze sentiment about the character in the book content
             character_sentiment = analyze_character_sentiment(book_content, character_name)
 
-            # Extract title and authors from metadata
             title = metadata.get('title', 'Unknown')
             authors = ', '.join([author['name'] for author in metadata.get('authors', [])])
             
-            # Return book information and character sentiment analysis in the response
             return Response({
                 "title": title, 
                 "authors": authors,
@@ -135,13 +141,10 @@ class CharacterSentimentAnalyserAPIView(APIView):
                 "sentiment_analysis": character_sentiment
             })
         except Exception as e:
-            # Return error response if book data retrieval fails
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def analyze_character_sentiment(book_content, character_name):
-    # Perform sentiment analysis focusing on the character in the book content
-    # using NLTK, TextBlob, and Transformers libraries
     
     # NLTK
     nltk_sentiment = nltk_analyser.nltk_analyze_character_sentiment(book_content, character_name)
@@ -150,8 +153,6 @@ def analyze_character_sentiment(book_content, character_name):
     # TextBlob
     textblob_sentiment = textblob_analyser.textblob_analyze_character_sentiment(book_content, character_name)
     print("TextBlob Sentiment Analysis ", textblob_sentiment)
-
-
 
     return {
         "NLTK_analysis": nltk_sentiment,
