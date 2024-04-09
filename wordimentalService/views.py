@@ -82,6 +82,7 @@ class CompareBooksAPIView(APIView):
         book1_id = request.data.get('id1')
         book2_id = request.data.get('id2')
 
+        print('here!')
         if book1_id is None or book2_id is None:
             return Response({"error": "Parameters 'id1' and 'id2' are required"}, status=status.HTTP_400_BAD_REQUEST)
         
